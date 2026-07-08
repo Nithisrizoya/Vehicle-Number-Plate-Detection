@@ -1,0 +1,14 @@
+# ── Plate detection & OCR engine ─────────────────────────────────────────────
+ultralytics>=8.2.0
+opencv-python>=4.9.0
+easyocr>=1.7.1
+numpy>=1.26.0
+imageio>=2.34.0
+imageio-ffmpeg>=0.5.1   # bundles a static ffmpeg with libx264 — cv2.VideoWriter's mp4v
+                        # output isn't playable in any browser, this is what fixes that
+
+# ── Dashboard web server (FastAPI) ───────────────────────────────────────────
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+httpx>=0.27.0

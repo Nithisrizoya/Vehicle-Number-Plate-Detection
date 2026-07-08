@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { @apply bg-slate-50 text-slate-900 antialiased; }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { @apply bg-slate-100; }
+  ::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-slate-400; }
+}
+
+@layer utilities {
+  .gradient-blue { background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%); }
+  .gradient-dark { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+  .text-balance  { text-wrap: balance; }
+}

@@ -64,6 +64,10 @@ class BoxTracker:
         track = {
             "bbox": bbox, "det_conf": det_conf, "plate_text": "", "ocr_conf": 0.0,
             "last_ocr": 0.0, "last_seen": now, "sighting_id": uuid.uuid4().hex,
+            # Gate-event binding: set once this track's first qualifying read opens
+            # an IN/OUT event, so every later re-read of the same physical car
+            # refreshes that one event instead of being re-identified from scratch.
+            "event_id": None, "event_plate": None, "event_conf": 0.0,
         }
         self._tracked.append(track)
         return None, track

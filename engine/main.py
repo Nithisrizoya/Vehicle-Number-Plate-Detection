@@ -106,30 +106,51 @@ def run(source: str, save_video: bool) -> int:
 
                     draw_detection(frame, bbox, det_conf, plate_text, ocr_conf)
 
-                    # A genuinely new/different-looking read still gets its own event + snapshot
-                    # (so two distinct-looking reads of a hard-to-read plate both stay visible).
-                    # But if a later read of the SAME already-active plate comes back with higher
-                    # confidence, upgrade that event's stored confidence/snapshot in place instead
-                    # of leaving it frozen on a weaker first read.
+                    # Identity for gate/visit tracking comes from the box-track (one physical
+                    # car = one sighting_id), not from fuzzy-matching OCR text. A car sitting in
+                    # frame gets re-OCR'd every OCR_REFRESH_SEC, and those re-reads can look quite
+                    # different from each other (glare, angle, motion blur) — matching them by
+                    # string similarity alone let a single car log two "IN" events. Instead: the
+                    # box-track's first qualifying read opens the event; every later read from
+                    # that SAME track only ever refreshes it (plate text, confidence, snapshot)
+                    # when it's a higher-confidence read, so one car never produces more than one
+                    # record.
                     if plate_text and ocr_conf >= OCR_MIN_CONFIDENCE and len(plate_text) >= OCR_MIN_LENGTH:
-                        result = tracker.observe(plate_text, ocr_conf, now)
-                        if result and result["action"] == "new":
-                            canonical, event_type = result["plate"], result["event_type"]
-                            snapshot = save_snapshot(frame)
-                            record = build_event(canonical, event_type, ocr_conf, snapshot, events, box_track["sighting_id"])
-                            events.append(record)
-                            tracker.finalize(canonical, record["id"])
-                            save_events(events)
-                            write_live(len(tracker.plates_seen))
-                            print(f"[ENGINE] {event_type} {canonical} (conf={ocr_conf:.2f}, visit=#{record['visit_number']})")
-                        elif result and result["action"] == "upgrade":
-                            for e in reversed(events):
-                                if e["id"] == result["event_id"]:
-                                    e["confidence"] = round(ocr_conf, 2)
-                                    e["snapshot"] = save_snapshot(frame)
-                                    break
-                            save_events(events)
-                            print(f"[ENGINE] upgraded {result['plate']} snapshot (conf={ocr_conf:.2f})")
+                        if box_track["event_id"] is not None:
+                            if ocr_conf > box_track["event_conf"]:
+                                tracker.rename(box_track["event_plate"], plate_text)
+                                for e in reversed(events):
+                                    if e["id"] == box_track["event_id"]:
+                                        e["plate"] = plate_text
+                                        e["confidence"] = round(ocr_conf, 2)
+                                        e["snapshot"] = save_snapshot(frame)
+                                        break
+                                box_track["event_plate"] = plate_text
+                                box_track["event_conf"] = ocr_conf
+                                save_events(events)
+                                print(f"[ENGINE] upgraded {plate_text} snapshot (conf={ocr_conf:.2f})")
+                        else:
+                            result = tracker.observe(plate_text, ocr_conf, now)
+                            if result and result["action"] == "new":
+                                canonical, event_type = result["plate"], result["event_type"]
+                                snapshot = save_snapshot(frame)
+                                record = build_event(canonical, event_type, ocr_conf, snapshot, events, box_track["sighting_id"])
+                                events.append(record)
+                                tracker.finalize(canonical, record["id"])
+                                box_track["event_id"] = record["id"]
+                                box_track["event_plate"] = canonical
+                                box_track["event_conf"] = ocr_conf
+                                save_events(events)
+                                write_live(len(tracker.plates_seen))
+                                print(f"[ENGINE] {event_type} {canonical} (conf={ocr_conf:.2f}, visit=#{record['visit_number']})")
+                            elif result and result["action"] == "upgrade":
+                                for e in reversed(events):
+                                    if e["id"] == result["event_id"]:
+                                        e["confidence"] = round(ocr_conf, 2)
+                                        e["snapshot"] = save_snapshot(frame)
+                                        break
+                                save_events(events)
+                                print(f"[ENGINE] upgraded {result['plate']} snapshot (conf={ocr_conf:.2f})")
 
                 tracker.sweep(now)
                 box_tracker.sweep(now)

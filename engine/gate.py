@@ -103,6 +103,22 @@ class GateTracker:
         if canonical in self.active_plates:
             self.active_plates[canonical]["event_id"] = event_id
 
+    def rename(self, old_canonical: str, new_canonical: str) -> None:
+        """Swap a committed plate's canonical identity for a stronger OCR read of
+        the same physical crossing, without touching its IN/OUT status or visit
+        history. Used when a box-track's later re-read is clearer than the one
+        that originally opened the event."""
+        if old_canonical == new_canonical:
+            return
+        status = self.plate_status.pop(old_canonical, None)
+        if status is not None:
+            self.plate_status[new_canonical] = status
+        entry = self.active_plates.pop(old_canonical, None)
+        if entry is not None:
+            self.active_plates[new_canonical] = entry
+        self.plates_seen.discard(old_canonical)
+        self.plates_seen.add(new_canonical)
+
     def sweep(self, now: float, grace_period: float = GRACE_PERIOD_SEC) -> None:
         """Evict plates absent longer than the grace period so they're
         eligible to fire a fresh event next time they're seen."""

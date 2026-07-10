@@ -13,6 +13,8 @@ export interface PlateEvent {
   duration_seconds?: number | null;
   visit_number?: number;
   sighting_id?: string;
+  brand?: string | null;
+  colour?: string | null;
 }
 
 export interface ProcState {

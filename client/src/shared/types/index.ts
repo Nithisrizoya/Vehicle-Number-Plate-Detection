@@ -32,6 +32,20 @@ export interface RecentActivityRow {
   snapshot?: string; sightingId?: string; confidence?: number;
 }
 
+export interface VerificationResult {
+  match: boolean;
+  plateRegistered: boolean;
+  driverIdMatch: boolean;
+  driverNameMatch: boolean;
+  extractedDriverId?: string | null;
+  extractedDriverName?: string | null;
+  driverName?: string | null;
+  driverId?: string | null;
+  goods?: string | null;
+  reason?: string;
+  emailSent?: boolean;
+}
+
 export interface DashboardStats {
   cars_today: number;
   currently_inside: number;

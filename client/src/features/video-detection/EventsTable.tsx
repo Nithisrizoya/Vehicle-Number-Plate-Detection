@@ -5,13 +5,14 @@ import { PlateBadge } from '@/shared/components/ui/PlateBadge';
 import { GateTimeCell } from '@/shared/components/ui/GateTimeCell';
 import { BrandCell } from '@/shared/components/ui/BrandCell';
 import { ColourCell } from '@/shared/components/ui/ColourCell';
+import { DriverVerification } from './DriverVerification';
 import { groupVisits } from '@/shared/lib/dedupe';
 import { formatDuration } from '@/shared/lib/utils';
 import type { PlateEvent } from '@/shared/types';
 
 interface Props { events: PlateEvent[]; onViewSnapshot: (src: string) => void; }
 
-const HEADERS = ['#', 'Plate Number', 'Brand', 'Colour', 'In Time', 'Out Time', 'Duration'];
+const HEADERS = ['#', 'Plate Number', 'Brand', 'Colour', 'In Time', 'Out Time', 'Duration', 'Driver Verification'];
 
 export function EventsTable({ events, onViewSnapshot }: Props) {
   const rows = groupVisits(events, e => e.visit_number);
@@ -50,6 +51,9 @@ export function EventsTable({ events, onViewSnapshot }: Props) {
                   </td>
                   <td className="px-4 py-2.5 text-xs text-slate-500 tabular-nums whitespace-nowrap">
                     {formatDuration(row.outEvent?.duration_seconds)}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <DriverVerification plate={row.plate} inTime={row.inEvent?.time} />
                   </td>
                 </tr>
               );

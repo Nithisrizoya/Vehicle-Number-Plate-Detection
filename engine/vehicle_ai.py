@@ -1,6 +1,6 @@
 """
-Vehicle brand/model/colour classification via Domo's hosted Gemini vision
-endpoint (domo.google.gemini-2.5-pro through /ai/v1/image/text).
+Vehicle brand/model/colour classification via Domo's hosted AI vision
+endpoint (/ai/v1/image/text).
 
 Best-effort enrichment only — every failure path returns {} rather than
 raising, so a slow/broken AI call never breaks plate detection itself.

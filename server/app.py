@@ -17,10 +17,11 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from config import OUTPUT_DIR, SNAPSHOTS_DIR
-from routes.detection import router as detection_router
-from routes.events    import router as events_router
-from routes.media     import router as media_router
-from routes.stats     import router as stats_router
+from routes.detection     import router as detection_router
+from routes.events        import router as events_router
+from routes.media         import router as media_router
+from routes.stats         import router as stats_router
+from routes.verification  import router as verification_router
 
 # ── App ──────────────────────────────────────────────────────────────────────
 app = FastAPI(title="Vehicle Plate Gate Dashboard API", docs_url=None, redoc_url=None)
@@ -37,6 +38,7 @@ app.include_router(detection_router)
 app.include_router(events_router)
 app.include_router(media_router)
 app.include_router(stats_router)
+app.include_router(verification_router)
 
 # ── Static directories ────────────────────────────────────────────────────────
 app.mount("/snapshots", StaticFiles(directory=str(SNAPSHOTS_DIR)), name="snapshots")
